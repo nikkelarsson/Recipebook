@@ -10,6 +10,7 @@ git clone https://github.com/nikkelarsson/Recipebook.git
 ```
 ## Usage
 * Run with python3 (or newer) or compile, I used nuitka to compile.
+
 **Run with python**
 ```
 python3 main.py
