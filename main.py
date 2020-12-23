@@ -71,12 +71,8 @@ mainparser.add_argument(
 		type=int,
 		# Hydration levels to choose from
 		choices=range(50, 101),
-		#metavar='',
-		#help='define water to flour ratio',
 		# Suppress help 'cause gparser already prints the same help
 		help=argparse.SUPPRESS,
-		# Default hydration to use
-		#default=68,
 		# Require 1 argument, else raise error
 		nargs=1,
 		# Make this argument requirement
@@ -90,11 +86,8 @@ mainparser.add_argument(
 		type=str,
 		# Available parameters to choose from
 		choices=('small', 's', 'medium', 'm', 'large', 'l'),
-		#metavar='',
 		#help='select portion size',
 		help=argparse.SUPPRESS,
-		# Default size to use
-		#default='m',
 		# Require 1 argument, else raise error
 		nargs=1,
 		# Make this argument requirement
@@ -113,20 +106,23 @@ mainparser.add_argument(
 		required=True,
 		)
 
-# Argument that will silence warning messages
-#mainparser.add_argument(
-#		'--silence-warnings',
-#		help=argparse.SUPPRESS,
-		#action='store_true',
-#		nargs='?',
-#		default='off',
-#		)
+mainparser.add_argument(
+		'-v', '--verbose',
+		help=argparse.SUPPRESS,
+		nargs='?',
+		# Only accept -v or --verbose w/o arguments or with 'on' or 'off'
+		choices=['on', 'off', ''],
+		# If --verbose is present explicitly w/o args, then enable verbose
+		const='on',
+		# If --verbose isn't present don't enable verbose mode
+		default='off',
+		)
 
 gparser_2 = mainparser.add_argument_group(
 		title='optional arguments',
-		description='''-h, --help						show this help message and exit
--V, --version						print program version and exit	
-    --silence-warnings			silence warning messages
+		description='''-h, --help\t\t\t\t\t\tshow this help message and exit
+-V, --version\t\t\t\t\t\tprint program version and exit	
+-v, --verbose\t\t\t\t\t\tprint additional message with the recipe
 		''',
 		)
 
@@ -134,9 +130,9 @@ gparser_2 = mainparser.add_argument_group(
 gparser = mainparser.add_argument_group(
 		title='recipe construction',
 		description='''    --recipe=TYPE					choose recipe type
--H, --hydration=PERCENTAGE		define water to flour ratio (50...100)
--S, --size=SIZE					define portion size
--t, --cooking-time=AMOUNT			define time cooking should take
+-H, --hydration=PERCENTAGE\t\tdefine water to flour ratio (50...100)
+-S, --size=SIZE\t\t\t\t\tdefine portion size
+-t, --cooking-time=NUMBER\t\t\tdefine time cooking should take
 		''',
 		)
 
@@ -152,6 +148,36 @@ try:
 	# Read arguments from the command line
 	args = mainparser.parse_args()
 
+	if args.verbose:
+		verbose = args.verbose
+		if 'on' in verbose:
+			print('''
+			\n======================================\n
+			Note!
+			If you're not going
+			to invest that much time
+			on baking, for example if
+			you want to make bread
+			from start to finish in
+			just 5 hours, then you
+			probably should alter the
+			amount of yeast (and salt)
+			in your recipe by increasing
+			the amount of both of them.\n
+			Why?
+			Because the dough develops
+			more flavour the longer it
+			ferments. Also, if you plan
+			on making bread in 5 hours
+			and use just 1/2 tsp of yeast,
+			the bread will not gain any
+			volume in that time.
+			So thats why!
+			\n======================================
+					''')
+		if 'off' in verbose:
+			pass
+
 	# Save selected values into their own variables for later use (printing out the instructions)
 	print('\n---Overview---\n')
 	recipe = args.recipe
@@ -163,31 +189,6 @@ try:
 	print('Selected size \t\t\t\t› %s' % size[0])
 	ct = args.cooking_time
 	print('Selected cooking time \t\t› %s hours' % ct[0])
-	print('''
-	\n======================================\n
-	Note!
-	If you're not going
-	to invest that much time
-	on baking, for example if
-	you want to make bread
-	from start to finish in
-	just 5 hours, then you
-	probably should alter the
-	amount of yeast (and salt)
-	in your recipe by increasing
-	the amount of both of them.\n
-	Why?
-	Because the dough develops
-	more flavour the longer it
-	ferments. Also, if you plan
-	on making bread in 5 hours
-	and use just 1/2 tsp of yeast,
-	the bread will not gain any
-	volume in that time.
-	So thats why!
-	\n======================================
-			''')
-		
 
 	# Recipe instructions as functions here
 	def small_bread(f):
@@ -276,7 +277,7 @@ try:
 # RIGHT NOW THIS SECTION SUCKS AND IS NOT SET UP IN VERY GOOD WAY!
 #=================================================================
 except:
-	# If no arguments are present, print little help message that is defined down below
+	# If no arguments are present, exit with error
 	if len(sys.argv) < 2:
 
 		# Exit and use error exit status
